@@ -38,6 +38,17 @@ class Task:
 
         return self.title == other.title
 
+    def __lt__(self, other: object) -> bool:
+        """Check if this task is less than another task.
+
+        :return: True if this task is less than another task, False otherwise.
+        :raise TypeError: If the other object is not a Task
+        """
+        if not isinstance(other, Task):
+            raise TypeError("The other object must be a Task.")
+
+        return self.priority.value > other.priority.value
+
 
 class TaskManager:
     """Provides utilities for managing tasks."""
@@ -79,3 +90,11 @@ class TaskManager:
             tasks.extend(self._tasks[priority.value])
 
         return tasks.copy()
+
+    def __len__(self) -> int:
+        """Get the total number of tasks.
+        Time complexity: ``O(1)``.
+
+        :return: Total number of tasks.
+        """
+        return sum(len(tasks) for tasks in self._tasks)

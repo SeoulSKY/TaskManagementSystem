@@ -47,7 +47,7 @@ class Task:
         if not isinstance(other, Task):
             raise TypeError("The other object must be a Task.")
 
-        return self.priority.value > other.priority.value
+        return self.priority.value < other.priority.value
 
 
 class TaskManager:
@@ -86,7 +86,7 @@ class TaskManager:
         :return: All tasks that are sorted by priority from highest to lowest.
         """
         tasks = []
-        for priority in Priority:
+        for priority in reversed(Priority):
             tasks.extend(self._tasks[priority.value])
 
         return tasks

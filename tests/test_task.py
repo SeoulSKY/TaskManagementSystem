@@ -1,3 +1,6 @@
+from dataclasses import replace
+from pathlib import Path
+
 import pytest
 
 from task import Priority, Task, TaskManager
@@ -10,6 +13,28 @@ tasks = [
     Task("Task 5", "Description 5", Priority.HIGH),
     Task("Task 6", "Description 6", Priority.MEDIUM),
 ]
+
+def test_hash() -> None:
+    """Test the __hash__ method."""
+    assert hash(tasks[0]) == hash(tasks[0])
+    assert hash(tasks[0]) == hash(replace(tasks[0]))
+    assert hash(tasks[0]) != hash(tasks[1])
+
+def test_eq() -> None:
+    """Test the __eq__ method."""
+    assert tasks[0] == tasks[0]
+    assert tasks[0] != tasks[1]
+    assert tasks[0] == replace(tasks[0])
+
+    assert tasks[0] != "hello"
+
+def test_lt() -> None:
+    """Test the __lt__ method."""
+    assert tasks[0] < tasks[1]
+    assert tasks[1] < tasks[2]
+
+    with pytest.raises(TypeError):
+        _ = tasks[0] < "hello"
 
 def test_add_task() -> None:
     """Test the add_task method."""
@@ -51,4 +76,4 @@ def test_get_all_tasks() -> None:
     assert sorted(all_tasks, reverse=True) == all_tasks
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main(Path(__file__))

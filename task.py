@@ -13,7 +13,7 @@ class Priority(Enum):
     HIGH = 2
 
 
-@dataclass
+@dataclass(frozen=True)
 class Task:
     """Contains the values of a task."""
 
@@ -89,7 +89,7 @@ class TaskManager:
         for priority in Priority:
             tasks.extend(self._tasks[priority.value])
 
-        return tasks.copy()
+        return tasks
 
     def __len__(self) -> int:
         """Get the total number of tasks.

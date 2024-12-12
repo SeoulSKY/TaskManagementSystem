@@ -14,66 +14,105 @@ tasks = [
     Task("Task 6", "Description 6", Priority.MEDIUM),
 ]
 
-def test_hash() -> None:
-    """Test the __hash__ method."""
-    assert hash(tasks[0]) == hash(tasks[0])
-    assert hash(tasks[0]) == hash(replace(tasks[0]))
-    assert hash(tasks[0]) != hash(tasks[1])
 
-def test_eq() -> None:
-    """Test the __eq__ method."""
-    assert tasks[0] == tasks[0]
-    assert tasks[0] != tasks[1]
-    assert tasks[0] == replace(tasks[0])
+class TestPriority:
+    """Test cases for Priority."""
 
-    assert tasks[0] != "hello"
+    def test_lt(self) -> None:
+        """Test the __lt__ method."""
+        assert Priority.LOW < Priority.MEDIUM
+        assert Priority.LOW < Priority.HIGH
 
-def test_lt() -> None:
-    """Test the __lt__ method."""
-    assert tasks[0] < tasks[1]
-    assert tasks[1] < tasks[2]
+        with pytest.raises(TypeError):
+            _ = Priority.LOW < "hello"
 
-    with pytest.raises(TypeError):
-        _ = tasks[0] < "hello"
+    def test_gt(self) -> None:
+        """Test the __gt__ method."""
+        assert Priority.HIGH > Priority.MEDIUM
+        assert Priority.HIGH > Priority.LOW
 
-def test_add_task() -> None:
-    """Test the add_task method."""
-    manager = TaskManager()
-    task = tasks[0]
+        with pytest.raises(TypeError):
+            _ = Priority.HIGH > "hello"
 
-    assert len(manager) == 0
+    def test_eq(self) -> None:
+        """Test the __eq__ method."""
+        assert Priority.LOW == Priority.LOW
+        assert Priority.LOW != Priority.HIGH
 
-    manager.add_task(task)
-    assert len(manager) == 1
+        assert Priority.LOW != "hello"
 
-    with pytest.raises(ValueError, match="exists"):
+
+class TestTask:
+    """Test cases for Task."""
+
+    def test_hash(self) -> None:
+        """Test the __hash__ method."""
+        assert hash(tasks[0]) == hash(tasks[0])
+        assert hash(tasks[0]) == hash(replace(tasks[0]))
+        assert hash(tasks[0]) != hash(tasks[1])
+
+    def test_eq(self) -> None:
+        """Test the __eq__ method."""
+        assert tasks[0] == tasks[0]
+        assert tasks[0] != tasks[1]
+        assert tasks[0] == replace(tasks[0])
+
+        assert tasks[0] != "hello"
+
+    def test_lt(self) -> None:
+        """Test the __lt__ method."""
+        assert tasks[0] < tasks[1]
+        assert tasks[1] < tasks[2]
+
+        with pytest.raises(TypeError):
+            _ = tasks[0] < "hello"
+
+    def test_index(self) -> None:
+        """Test the __index__ method."""
+        numbers = [1, 2, 3]
+        _ = numbers[Priority.LOW]
+
+class TestTaskManager:
+    """Test cases for TaskManager."""
+
+    def test_add_task(self) -> None:
+        """Test the add_task method."""
+        manager = TaskManager()
+        task = tasks[0]
+
+        assert len(manager) == 0
+
         manager.add_task(task)
+        assert len(manager) == 1
+
+        with pytest.raises(ValueError, match="exists"):
+            manager.add_task(task)
 
 
-def test_add_tasks() -> None:
-    """Test the add_tasks method."""
-    manager = TaskManager()
+    def test_add_tasks(self) -> None:
+        """Test the add_tasks method."""
+        manager = TaskManager()
 
-    manager.add_tasks([])
-    assert len(manager) == 0
+        manager.add_tasks([])
+        assert len(manager) == 0
 
-    manager.add_tasks(tasks)
-    assert len(manager) == len(tasks)
+        manager.add_tasks(tasks)
+        assert len(manager) == len(tasks)
 
-    with pytest.raises(ValueError, match="exists"):
-        manager.add_tasks([tasks[0]])
+        with pytest.raises(ValueError, match="exists"):
+            manager.add_tasks([tasks[0]])
 
-def test_get_all_tasks() -> None:
-    """Test the get_all_tasks method."""
-    manager = TaskManager()
-    assert len(list(manager.get_all_tasks())) == 0
+    def test_get_all_tasks(self) -> None:
+        """Test the get_all_tasks method."""
+        manager = TaskManager()
+        assert len(list(manager.get_all_tasks())) == 0
 
-    manager.add_tasks(tasks)
+        manager.add_tasks(tasks)
 
-    all_tasks = list(manager.get_all_tasks())
-    assert len(all_tasks) == len(tasks)
+        all_tasks = list(manager.get_all_tasks())
+        assert len(all_tasks) == len(tasks)
 
-    assert sorted(all_tasks, reverse=True) == all_tasks
+        assert sorted(all_tasks, reverse=True) == all_tasks
 
 if __name__ == "__main__":
     pytest.main(Path(__file__))

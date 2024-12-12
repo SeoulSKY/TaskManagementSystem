@@ -12,6 +12,46 @@ class Priority(Enum):
     MEDIUM = 1
     HIGH = 2
 
+    def __lt__(self, other: object) -> bool:
+        """Compare the priority of this task with another object.
+
+        :param other: Object to compare with.
+        :return: True if this priority is less than the other priority, False otherwise.
+        """
+        if not isinstance(other, Priority):
+            raise TypeError("The other object must be a Priority.")
+
+        return self.value < other.value
+
+    def __gt__(self, other: object) -> bool:
+        """Compare the priority of this task with another object.
+
+        :param other: Object to compare with.
+        :return: True if this priority is greater than the other priority,
+        False otherwise.
+        """
+        if not isinstance(other, Priority):
+            raise TypeError("The other object must be a Priority.")
+
+        return self.value > other.value
+
+    def __eq__(self, other: object) -> bool:
+        """Check if this task is equal to another object.
+
+        :param other: Object to compare with.
+        :return: True if this task is equal to another object, False otherwise.
+        """
+        if not isinstance(other, Priority):
+            return False
+
+        return self.value == other.value
+
+    def __index__(self) -> int:
+        """Convert the priority as an index.
+        :return: Index of the priority.
+        """
+        return self.value
+
 
 @dataclass(frozen=True)
 class Task:
@@ -47,7 +87,7 @@ class Task:
         if not isinstance(other, Task):
             raise TypeError("The other object must be a Task.")
 
-        return self.priority.value < other.priority.value
+        return self.priority < other.priority
 
 
 class TaskManager:
@@ -57,6 +97,15 @@ class TaskManager:
         """Initialize the task manager with an empty task."""
         self._tasks: list[set[Task]] = [set() for _ in range(len(Priority))]
 
+    def has_task(self, task: Task) -> bool:
+        """Check if the task exists.
+        Time complexity: ``O(1)``.
+
+        :param task: Task to check
+        :return: True if the task exists, False otherwise
+        """
+        return task in self._tasks[task.priority]
+
     def add_task(self, task: Task) -> None:
         """Add a task.
         Time complexity: ``O(1)``.
@@ -64,10 +113,10 @@ class TaskManager:
         :param task: Task to add.
         :raises ValueError: If the task with the same title already exists.
         """
-        if task in self._tasks[task.priority.value]:
+        if self.has_task(task):
             raise ValueError(f"Task with the title '{task.title}' already exists.")
 
-        self._tasks[task.priority.value].add(task)
+        self._tasks[task.priority].add(task)
 
     def add_tasks(self, tasks: Iterable[Task]) -> None:
         """Add multiple tasks.
@@ -87,7 +136,7 @@ class TaskManager:
         """
         tasks = []
         for priority in reversed(Priority):
-            tasks.extend(self._tasks[priority.value])
+            tasks.extend(self._tasks[priority])
 
         return tasks
 

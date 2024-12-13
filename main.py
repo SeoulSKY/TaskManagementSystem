@@ -3,6 +3,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, FastAPI, status
 from starlette.exceptions import HTTPException
+from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, RedirectResponse, Response
 from starlette.staticfiles import StaticFiles
 
@@ -20,6 +21,14 @@ class SuccessResponse(JSONResponse):
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.mount("/public",
           StaticFiles(directory=Path(__file__).parent / "public", html=True))

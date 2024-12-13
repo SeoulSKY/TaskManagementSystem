@@ -117,6 +117,13 @@ def test_add_tasks() -> None:
     assert response.status_code == status.HTTP_409_CONFLICT
     assert ERROR_KEY in response.json()
 
+    manager.clear_tasks()
+    duplicated_tasks = [tasks[0], tasks[0]]
+
+    response = client.post(url, json=[task.model_dump() for task in duplicated_tasks])
+    assert response.status_code == status.HTTP_409_CONFLICT
+    assert ERROR_KEY in response.json()
+
 
 def test_clear_tasks() -> None:
     """Test the endpoint /api/tasks DELETE."""

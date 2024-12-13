@@ -13,7 +13,7 @@
  * @property {Priority} priority
  */
 
-const BASE_URL = "http://localhost:8000/api";
+const BASE_URL = "http://localhost:8000/api/";
 
 /**
  * Send an HTTP request to the specified server endpoint with the given method and data.
@@ -24,7 +24,7 @@ const BASE_URL = "http://localhost:8000/api";
  * @returns {undefined | Task | Task[]} The response body of the request.
  */
 async function request(endpoint, data = {}, method = "GET") {
-  const url = new URL(endpoint, BASE_URL);
+  const url = new URL(BASE_URL + endpoint);
   const settings = { method };
 
   if (["HEAD", "GET", "DELETE"].includes(method)) {
@@ -69,7 +69,7 @@ async function getTask(title) {
  * @throws {Error} If the task already exists in the list.
  */
 async function addTask(task) {
-  return request("tasks", task, "POST");
+  return request("task", task, "POST");
 }
 
 /**

@@ -1,4 +1,7 @@
 """Entry point of the program."""
 
-if __name__ == "__main__":
-    print("Hello world!")
+from fastapi import FastAPI
+from starlette.staticfiles import StaticFiles
+
+app = FastAPI()
+app.mount("/", StaticFiles(directory="public", html=True), name="public")

@@ -10,17 +10,28 @@
 pyenv install 3.13
 ```
 
-* Setup and activate the virtual environment
+Setup and activate the virtual environment
 
 ```bash
 pyenv virtualenv 3.13 tms
 pyenv local tms
 ```
 
-* Install the required packages
+Install the required packages
+
 ```bash
 pyenv exec pip install -r requirements.txt 
 ```
+
+## How to Run
+
+Run the following command
+
+```bash
+pyenv exec fastapi dev main.py
+```
+
+Click [here](http://localhost:8000) to use the task management system with a web browser.
 
 ## Continuous Integration
 

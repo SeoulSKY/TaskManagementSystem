@@ -1,19 +1,9 @@
 """Test cases for task module."""
 
-from dataclasses import replace
-
 import pytest
 
 from task import Priority, Task, TaskManager
-
-tasks = [
-    Task("Task 1", "Description 1", Priority.LOW),
-    Task("Task 2", "Description 2", Priority.MEDIUM),
-    Task("Task 3", "Description 3", Priority.HIGH),
-    Task("Task 4", "Description 4", Priority.LOW),
-    Task("Task 5", "Description 5", Priority.HIGH),
-    Task("Task 6", "Description 6", Priority.MEDIUM),
-]
+from tests import tasks
 
 
 class TestPriority:
@@ -42,6 +32,18 @@ class TestPriority:
 
         assert Priority.LOW != "hello"
 
+    def test_missing(self) -> None:
+        """Test the _missing_ method."""
+        low_values = ["LOW", "Low", "low", 0]
+        invalid_values = ["invalid", 0.5]
+
+        for value in low_values:
+            assert Priority(value) == Priority.LOW
+
+        for value in invalid_values:
+            with pytest.raises(ValueError, match="Priority"):
+                Priority(value)
+
 
 class TestTask:
     """Test cases for Task."""
@@ -49,14 +51,14 @@ class TestTask:
     def test_hash(self) -> None:
         """Test the __hash__ method."""
         assert hash(tasks[0]) == hash(tasks[0])
-        assert hash(tasks[0]) == hash(replace(tasks[0]))
+        assert hash(tasks[0]) == hash(tasks[0].model_copy())
         assert hash(tasks[0]) != hash(tasks[1])
 
     def test_eq(self) -> None:
         """Test the __eq__ method."""
         assert tasks[0] == tasks[0]
         assert tasks[0] != tasks[1]
-        assert tasks[0] == replace(tasks[0])
+        assert tasks[0] == tasks[0].model_copy()
 
         assert tasks[0] != "hello"
 
@@ -103,18 +105,18 @@ class TestTaskManager:
         with pytest.raises(ValueError, match="exists"):
             manager.add_tasks([tasks[0]])
 
-    def test_remove_task(self) -> None:
-        """Test the remove_task method."""
+    def test_delete_task(self) -> None:
+        """Test the delete_task method."""
         manager = TaskManager()
         manager.add_tasks(tasks)
 
         assert len(manager) == len(tasks)
 
-        manager.remove_task(tasks[0].title)
+        manager.delete_task(tasks[0].title)
         assert len(manager) == len(tasks) - 1
 
         with pytest.raises(ValueError, match="not exist"):
-            manager.remove_task(tasks[0].title)
+            manager.delete_task(tasks[0].title)
 
     def test_update_task(self) -> None:
         """Test the update_task method."""
@@ -126,9 +128,9 @@ class TestTaskManager:
         new_description = "New Description"
         new_priority = Priority.HIGH
 
-        updated_task = replace(tasks[0],
-                               description=new_description,
-                               priority=new_priority)
+        updated_task = tasks[0].model_copy(
+            update={"description": new_description, "priority": new_priority}
+        )
         manager.update_task(updated_task)
 
         assert len(manager) == len(tasks)
@@ -142,7 +144,9 @@ class TestTaskManager:
                         f"'{new_description}` and priority '{new_priority}' not found.")
 
         with pytest.raises(ValueError, match="not exist"):
-            manager.update_task(Task("hello", "", Priority.LOW))
+            manager.update_task(
+                Task(title="hello", description="", priority=Priority.LOW)
+            )
 
     def test_get_task(self) -> None:
         """Test the get_task method."""
@@ -187,6 +191,21 @@ class TestTaskManager:
         assert len(list(manager.search_tasks(
             predicate=lambda t: t.priority == Priority.LOW
         ))) == len(list(filter(lambda t: t.priority == Priority.LOW, tasks)))
+
+    def test_clear_tasks(self) -> None:
+        """Test the clear_tasks method."""
+        manager = TaskManager()
+
+        manager.clear_tasks()
+        assert len(manager) == 0
+
+        manager.add_tasks(tasks)
+
+        assert len(manager) == len(tasks)
+
+        manager.clear_tasks()
+        assert len(manager) == 0
+
 
 if __name__ == "__main__":
     pytest.main(__file__)

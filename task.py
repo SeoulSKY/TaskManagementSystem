@@ -1,8 +1,10 @@
 """Provides classes for task manager."""
 
 from collections.abc import Callable, Iterable
-from dataclasses import dataclass
 from enum import Enum
+from typing import Self
+
+from pydantic import BaseModel, ConfigDict, field_serializer
 
 
 class Priority(Enum):
@@ -52,14 +54,31 @@ class Priority(Enum):
         """
         return self.value
 
+    @classmethod
+    def _missing_(cls, value: object) -> Self:
+        """Execute when the value cannot be found in the properties."""
+        try:
+            if isinstance(value, str):
+                return cls[value.upper()]
+        except (KeyError, ValueError) as e:
+            raise ValueError(f"Invalid Priority: {value}") from e
 
-@dataclass(frozen=True)
-class Task:
+
+class Task(BaseModel):
     """Contains the values of a task."""
+
+    model_config = ConfigDict(frozen=True)
 
     title: str
     description: str
     priority: Priority
+
+
+    @field_serializer("priority")
+    def serialize_priority(self, priority: Priority, _: type) -> str:
+        """Serialize priority field."""
+        return priority.name
+
 
     def __hash__(self) -> int:
         """Return a hash code for this task.
@@ -94,8 +113,16 @@ class TaskManager:
     """Provides utilities for managing tasks."""
 
     def __init__(self) -> None:
-        """Initialize the task manager with an empty task."""
-        self._tasks: list[dict[str, Task]] = [{} for _ in range(len(Priority))]
+        """Initialize the task manager."""
+        self._tasks = self._new_task_container()
+
+    @staticmethod
+    def _new_task_container() -> list[dict[str, Task]]:
+        """Create a new task container.
+
+        :return: New task container.
+        """
+        return [{} for _ in range(len(Priority))]
 
     def has_task(self, task: Task) -> bool:
         """Check if the task exists.
@@ -128,12 +155,12 @@ class TaskManager:
         for task in tasks:
             self.add_task(task)
 
-    def remove_task(self, title: str) -> Task:
-        """Remove a task by its title.
+    def delete_task(self, title: str) -> Task:
+        """Delete a task by its title.
         Time complexity: ``O(1)``.
 
-        :param title: Title of the task to remove.
-        :return: The removed task.
+        :param title: Title of the task to delete.
+        :return: The deleted task.
         :raises ValueError: If there is no task with the given title.
         """
         task = self.get_task(title=title)
@@ -146,7 +173,7 @@ class TaskManager:
         :param task: Task to update.
         :raises ValueError: If there is no task with the title in the given task.
         """
-        self.remove_task(task.title)
+        self.delete_task(task.title)
         self._tasks[task.priority][task.title] = task
 
     def get_task(self, *, title: str) -> Task:
@@ -196,6 +223,12 @@ class TaskManager:
         for task in self.get_all_tasks():
             if predicate(task):
                 yield task
+
+    def clear_tasks(self) -> None:
+        """Clear all tasks.
+        Time complexity: ``O(1)``.
+        """
+        self._tasks = self._new_task_container()
 
     def __len__(self) -> int:
         """Get the total number of tasks.

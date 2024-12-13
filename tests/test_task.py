@@ -1,5 +1,6 @@
+"""Test cases for task module."""
+
 from dataclasses import replace
-from pathlib import Path
 
 import pytest
 
@@ -102,28 +103,6 @@ class TestTaskManager:
         with pytest.raises(ValueError, match="exists"):
             manager.add_tasks([tasks[0]])
 
-    def test_get_task(self) -> None:
-        """Test the get_task method."""
-        manager = TaskManager()
-        manager.add_tasks(tasks)
-
-        assert manager.get_task(tasks[0].title) == tasks[0]
-
-        with pytest.raises(ValueError, match="not exist"):
-            manager.get_task("hello")
-
-    def test_get_all_tasks(self) -> None:
-        """Test the get_all_tasks method."""
-        manager = TaskManager()
-        assert len(list(manager.get_all_tasks())) == 0
-
-        manager.add_tasks(tasks)
-
-        all_tasks = list(manager.get_all_tasks())
-        assert len(all_tasks) == len(tasks)
-
-        assert sorted(all_tasks, reverse=True) == all_tasks
-
     def test_remove_task(self) -> None:
         """Test the remove_task method."""
         manager = TaskManager()
@@ -147,7 +126,9 @@ class TestTaskManager:
         new_description = "New Description"
         new_priority = Priority.HIGH
 
-        updated_task = replace(tasks[0], description=new_description, priority=new_priority)
+        updated_task = replace(tasks[0],
+                               description=new_description,
+                               priority=new_priority)
         manager.update_task(updated_task)
 
         assert len(manager) == len(tasks)
@@ -161,7 +142,51 @@ class TestTaskManager:
                         f"'{new_description}` and priority '{new_priority}' not found.")
 
         with pytest.raises(ValueError, match="not exist"):
-            manager.update_task(Task("Non-existing task", "", Priority.LOW))
+            manager.update_task(Task("hello", "", Priority.LOW))
+
+    def test_get_task(self) -> None:
+        """Test the get_task method."""
+        manager = TaskManager()
+        manager.add_tasks(tasks)
+
+        assert manager.get_task(title=tasks[0].title) == tasks[0]
+
+        with pytest.raises(ValueError, match="not exist"):
+            manager.get_task(title="hello")
+
+    def test_get_tasks(self) -> None:
+        """Test the get_tasks method."""
+        manager = TaskManager()
+        manager.add_tasks(tasks)
+
+        for priority in Priority:
+            assert (len(list(manager.get_tasks(priority=priority)))
+                    == len(list(filter(lambda t: t.priority == priority, tasks))))
+
+    def test_get_all_tasks(self) -> None:
+        """Test the get_all_tasks method."""
+        manager = TaskManager()
+        assert len(list(manager.get_all_tasks())) == 0
+
+        manager.add_tasks(tasks)
+
+        all_tasks = list(manager.get_all_tasks())
+        assert len(all_tasks) == len(tasks)
+
+        assert sorted(all_tasks, reverse=True) == all_tasks
+
+    def test_search_tasks(self) -> None:
+        """Test the search_tasks method."""
+        manager = TaskManager()
+        manager.add_tasks(tasks)
+
+        assert len(list(manager.search_tasks(
+            predicate=lambda t: t.description == tasks[0].description
+        ))) == 1
+
+        assert len(list(manager.search_tasks(
+            predicate=lambda t: t.priority == Priority.LOW
+        ))) == len(list(filter(lambda t: t.priority == Priority.LOW, tasks)))
 
 if __name__ == "__main__":
-    pytest.main(Path(__file__))
+    pytest.main(__file__)

@@ -1,6 +1,6 @@
 """Provides classes for task manager."""
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from enum import Enum
 
@@ -136,7 +136,7 @@ class TaskManager:
         :return: The removed task.
         :raises ValueError: If there is no task with the given title.
         """
-        task = self.get_task(title)
+        task = self.get_task(title=title)
         return self._tasks[task.priority].pop(task.title)
 
     def update_task(self, task: Task) -> None:
@@ -149,7 +149,7 @@ class TaskManager:
         self.remove_task(task.title)
         self._tasks[task.priority][task.title] = task
 
-    def get_task(self, title: str) -> Task:
+    def get_task(self, *, title: str) -> Task:
         """Get a task by its title.
         Time complexity: ``O(1)``.
 
@@ -164,18 +164,38 @@ class TaskManager:
 
         raise ValueError(f"Task with the title '{title}' does not exist.")
 
+    def get_tasks(self, *, priority: Priority) -> Iterable[Task]:
+        """Get tasks that match the given priority
+        Time complexity: ``O(1)``.
+
+        :param priority: Priority of the tasks to get
+        :return: Tasks with the given priority.
+        """
+        return self._tasks[priority].values()
 
     def get_all_tasks(self) -> Iterable[Task]:
-        """Get all tasks sorted by their priority.
-        Time complexity: ``O(n)`` where n is the number of tasks.
+        """Lazily get all tasks sorted by their priority.
+        Time complexity: ``O(1)`` for calling this function.
+        ``O(n)`` for consuming the returned iterable object,
+        where n is the number of tasks.
 
         :return: All tasks that are sorted by priority from highest to lowest.
         """
-        tasks = []
         for priority in reversed(Priority):
-            tasks.extend(self._tasks[priority].values())
+            yield from self._tasks[priority].values()
 
-        return tasks
+    def search_tasks(self, *, predicate: Callable[[Task], bool]) -> Iterable[Task]:
+        """Lazily search for tasks that satisfy a given predicate.
+        Time complexity: ``O(1)`` for calling this function.
+        ``O(n)`` for consuming the returned iterable object,
+        where n is the number of tasks.
+
+        :param predicate: Predicate function to check for each task.
+        :return: Tasks that satisfy the predicate.
+        """
+        for task in self.get_all_tasks():
+            if predicate(task):
+                yield task
 
     def __len__(self) -> int:
         """Get the total number of tasks.

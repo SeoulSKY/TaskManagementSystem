@@ -102,6 +102,16 @@ class TestTaskManager:
         with pytest.raises(ValueError, match="exists"):
             manager.add_tasks([tasks[0]])
 
+    def test_get_task(self) -> None:
+        """Test the get_task method."""
+        manager = TaskManager()
+        manager.add_tasks(tasks)
+
+        assert manager.get_task(tasks[0].title) == tasks[0]
+
+        with pytest.raises(ValueError, match="not exist"):
+            manager.get_task("hello")
+
     def test_get_all_tasks(self) -> None:
         """Test the get_all_tasks method."""
         manager = TaskManager()
@@ -113,6 +123,45 @@ class TestTaskManager:
         assert len(all_tasks) == len(tasks)
 
         assert sorted(all_tasks, reverse=True) == all_tasks
+
+    def test_remove_task(self) -> None:
+        """Test the remove_task method."""
+        manager = TaskManager()
+        manager.add_tasks(tasks)
+
+        assert len(manager) == len(tasks)
+
+        manager.remove_task(tasks[0].title)
+        assert len(manager) == len(tasks) - 1
+
+        with pytest.raises(ValueError, match="not exist"):
+            manager.remove_task(tasks[0].title)
+
+    def test_update_task(self) -> None:
+        """Test the update_task method."""
+        manager = TaskManager()
+        manager.add_tasks(tasks)
+
+        assert len(manager) == len(tasks)
+
+        new_description = "New Description"
+        new_priority = Priority.HIGH
+
+        updated_task = replace(tasks[0], description=new_description, priority=new_priority)
+        manager.update_task(updated_task)
+
+        assert len(manager) == len(tasks)
+
+        for task in manager.get_all_tasks():
+            if (task.title == tasks[0].title and task.description == new_description
+                    and task.priority == new_priority):
+                break
+        else:
+            pytest.fail(f"Task with title '{tasks[0].title} title, description "
+                        f"'{new_description}` and priority '{new_priority}' not found.")
+
+        with pytest.raises(ValueError, match="not exist"):
+            manager.update_task(Task("Non-existing task", "", Priority.LOW))
 
 if __name__ == "__main__":
     pytest.main(Path(__file__))

@@ -2,6 +2,7 @@
 
 ![Ruff](https://github.com/SeoulSKY/TaskManagementSystem/actions/workflows/ruff.yml/badge.svg)
 ![Pytest](https://github.com/SeoulSKY/TaskManagementSystem/actions/workflows/pytest.yml/badge.svg)
+[![codecov](https://codecov.io/gh/SeoulSKY/TaskManagementSystem/graph/badge.svg?token=TA1IBHAWSS)](https://codecov.io/gh/SeoulSKY/TaskManagementSystem)
 
 ## How to setup the environment
 
@@ -54,11 +55,15 @@ Click [here](http://localhost:8000) to use the task management system with a web
 
 ## Continuous Integration
 
-### Pipeline
+### Pipelines
+
+This repository uses GitHub Actions for implementing CI pipelines.
 
 ![Ruff](https://github.com/SeoulSKY/TaskManagementSystem/actions/workflows/ruff.yml/badge.svg) — Result of linting for coding style.
 
 ![Pytest](https://github.com/SeoulSKY/TaskManagementSystem/actions/workflows/pytest.yml/badge.svg) — Result of running test suites.
+
+[![codecov](https://codecov.io/gh/SeoulSKY/TaskManagementSystem/graph/badge.svg?token=TA1IBHAWSS)](https://codecov.io/gh/SeoulSKY/TaskManagementSystem) — Result of the code coverage testing.
 
 ### Manual
 

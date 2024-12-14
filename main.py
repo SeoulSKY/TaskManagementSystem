@@ -6,6 +6,7 @@ from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, RedirectResponse, Response
 from starlette.staticfiles import StaticFiles
+from starlette.status import HTTP_200_OK
 
 from task import Priority, Task, TaskManager
 
@@ -13,7 +14,7 @@ from task import Priority, Task, TaskManager
 class SuccessResponse(JSONResponse):
     """Response for success."""
 
-    def __init__(self, *, status_code: int) -> None:
+    def __init__(self, *, status_code: int = HTTP_200_OK) -> None:
         """Initialize the success response.
         :param status_code: The status code of the response.
         """
@@ -78,7 +79,7 @@ def update_task(task: Task) -> Response:
     """
     try:
         manager.update_task(task)
-        return SuccessResponse(status_code=status.HTTP_204_NO_CONTENT)
+        return SuccessResponse()
     except ValueError as e:
         raise HTTPException(status.HTTP_404_NOT_FOUND, str(e)) from None
 
@@ -91,7 +92,7 @@ def delete_task(title: str) -> Response:
     """
     try:
         manager.delete_task(title)
-        return SuccessResponse(status_code=status.HTTP_204_NO_CONTENT)
+        return SuccessResponse()
     except ValueError as e:
         raise HTTPException(status.HTTP_404_NOT_FOUND, str(e)) from None
 
@@ -125,7 +126,7 @@ def clear_tasks() -> Response:
     :return: A success response.
     """
     manager.clear_tasks()
-    return SuccessResponse(status_code=status.HTTP_204_NO_CONTENT)
+    return SuccessResponse()
 
 
 @search_router.get("/title")

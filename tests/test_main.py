@@ -68,7 +68,7 @@ def test_update_task() -> None:
     updated_task = task.model_copy(update={"description": new_description})
 
     response = client.put(url, json=updated_task.model_dump())
-    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert response.status_code == status.HTTP_200_OK
     assert manager.get_task(title=task.title) == task
 
 
@@ -84,7 +84,7 @@ def test_delete_task() -> None:
     manager.add_task(task)
 
     response = client.delete(url, params={"title": task.title})
-    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert response.status_code == status.HTTP_200_OK
     assert len(manager) == 0
 
 
@@ -130,12 +130,12 @@ def test_clear_tasks() -> None:
     url = "/api/tasks"
 
     response = client.delete(url)
-    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert response.status_code == status.HTTP_200_OK
 
     manager.add_tasks(tasks)
 
     response = client.delete(url)
-    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert response.status_code == status.HTTP_200_OK
     assert len(manager) == 0
 
 

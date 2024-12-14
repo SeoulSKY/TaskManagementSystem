@@ -71,6 +71,16 @@
       function removeChildren(element) {
         [...element.children].forEach((child) => child.remove());
       }
+
+      /**
+       * Get the selected option from the given select element
+       *
+       * @param {HTMLElement} selectElement The select element containing the option
+       * @return {HTMLElement | undefined} The selected option
+       */
+      function getSelectedOption(selectElement) {
+        return selectElement.options[selectElement.selectedIndex];
+      }
     </script>
 
     <!-- Components -->
@@ -100,8 +110,7 @@
           class="form-select"
           aria-label="select priority"
         >
-          <option selected disabled value="">Select a priority</option>
-          <option>Low</option>
+          <option selected>Low</option>
           <option>Medium</option>
           <option>High</option>
         </select>
@@ -304,12 +313,17 @@
                 aria-labelledby="v-pills-priority-tab"
               >
                 <select id="readPrioritySelect" class="form-select">
-                  <option selected>All</option>
+                  <option selected value="all">All</option>
                   <option>Low</option>
                   <option>Medium</option>
                   <option>High</option>
                 </select>
-                <button class="btn btn-primary mt-3">Submit</button>
+                <button
+                  class="btn btn-primary mt-3"
+                  onclick="onReadPrioritySubmit()"
+                >
+                  Submit
+                </button>
               </div>
             </div>
           </div>
@@ -366,14 +380,9 @@
             return;
           }
 
-          const priority = [
-            ...inputGroup.querySelector("#createPrioritySelect").options,
-          ].filter((option) => option.selected)[0]?.value;
-
-          if (!priority) {
-            toast.error("Priority is required");
-            return;
-          }
+          const priority = getSelectedOption(
+            inputGroup.querySelector("#createPrioritySelect")
+          ).value;
 
           tasks.push({ title, description, priority });
         }
@@ -409,9 +418,9 @@
 
       async function onReadTitleSubmit() {
         const titleInput = document.querySelector("#readTitleInput");
-        const option = [
-          ...document.querySelector("#readTitleSelect").options,
-        ].filter((option) => option.selected)[0];
+        const option = getSelectedOption(
+          document.querySelector("#readTitleSelect")
+        );
 
         if (!titleInput.value) {
           toast.error("Title is required");
@@ -420,20 +429,88 @@
 
         let tasks;
         try {
-          switch (option.value) {
-            case "match":
-              tasks = [await getTask(titleInput.value)];
-              break;
-            case "keyword":
-              tasks = await searchTitle(titleInput.value);
-              break;
-            default:
-              console.error("Invalid title option: " + option.value);
-              return;
+          if (option.value === "match") {
+            tasks = [await getTask(titleInput.value)];
+          } else {
+            tasks = await searchTitle(titleInput.value);
           }
         } catch (err) {
           toast.error(err.message);
           console.error(err);
+          return;
+        }
+
+        const container = document.querySelector("#readTaskContainer");
+
+        removeChildren(container);
+
+        if (tasks.length === 0) {
+          toast.error("No tasks found");
+          return;
+        }
+
+        tasks.forEach((task) => {
+          container.appendChild(createTaskCard(task));
+        });
+
+        titleInput.value = "";
+      }
+
+      async function onReadDescriptionSubmit() {
+        const descriptionInput = document.querySelector(
+          "#readDescriptionInput"
+        );
+
+        if (!descriptionInput.value) {
+          toast.error("Keyword is required");
+          return;
+        }
+
+        let tasks;
+        try {
+          tasks = await searchDescription(descriptionInput.value);
+        } catch (err) {
+          toast.error(err.message);
+          console.error(err);
+          return;
+        }
+
+        if (tasks.length === 0) {
+          toast.error("No tasks found");
+          return;
+        }
+
+        const container = document.querySelector("#readTaskContainer");
+
+        removeChildren(container);
+
+        tasks.forEach((task) => {
+          container.appendChild(createTaskCard(task));
+        });
+
+        descriptionInput.value = "";
+      }
+
+      async function onReadPrioritySubmit() {
+        const option = getSelectedOption(
+          document.querySelector("#readPrioritySelect")
+        );
+
+        let tasks;
+        try {
+          if (option.value === "all") {
+            tasks = await getAllTasks();
+          } else {
+            tasks = await searchPriority(option.value);
+          }
+        } catch (err) {
+          toast.error(err.message);
+          console.error(err);
+          return;
+        }
+
+        if (tasks.length === 0) {
+          toast.error("No tasks found");
           return;
         }
 

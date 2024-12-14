@@ -21,7 +21,7 @@ const BASE_URL = "http://localhost:8000/api/";
  * @param {string} endpoint The endpoint to send the request to.
  * @param {Record<string, any>} data The data to send to the server.
  * @param {RequestMethod} method The request method.
- * @returns {undefined | Task | Task[]} The response body of the request.
+ * @returns {Promise<undefined | Task | Task[]>} The response body of the request.
  */
 async function request(endpoint, data = {}, method = "GET") {
   const url = new URL(BASE_URL + endpoint);
@@ -56,7 +56,7 @@ async function request(endpoint, data = {}, method = "GET") {
 /**
  * Get a task that matches the given title.
  * @param {string} title The title of the task.
- * @returns {Task} The task object.
+ * @returns {Promise<Task>} The task object.
  * @throws {Error} If the task does not exist.
  */
 async function getTask(title) {
@@ -75,15 +75,16 @@ async function addTask(task) {
 /**
  * Update a task in the list of tasks.
  * @param {Task} task The task object to update.
+ * @returns {Promise<void>}
  * @throws {Error} if the task is not on the list of tasks.
  */
 async function updateTask(task) {
-  return request("tasks", task, "PUT");
+  return request("task", task, "PUT");
 }
 
 /**
  * Get all tasks sorted by their priority.
- * @returns {Task[]} The tasks sorted by their priority.
+ * @returns {Promise<Task[]>} The tasks sorted by their priority.
  */
 async function getAllTasks() {
   return request("tasks");
@@ -92,6 +93,7 @@ async function getAllTasks() {
 /**
  * Add tasks to the list of tasks.
  * @param {Task[]} tasks The tasks to add.
+ * @returns {Promise<void>}
  * @throws {Error} If any of the tasks already exist in the list.
  */
 async function addTasks(tasks) {
@@ -100,6 +102,7 @@ async function addTasks(tasks) {
 
 /**
  * Clear tasks from the list of tasks.
+ * @returns {Promise<void>}
  */
 async function clearTasks() {
   return request("tasks", {}, "DELETE");
@@ -108,7 +111,7 @@ async function clearTasks() {
 /**
  * Search all tasks that have the given keyword in their titles.
  * @param {string} keyword The keyword to search for.
- * @returns {Task[]} The search results.
+ * @returns {Promise<Task[]>} The search results.
  */
 async function searchTitle(keyword) {
   return request("search/title", { keyword });
@@ -117,7 +120,7 @@ async function searchTitle(keyword) {
 /**
  * Search all tasks that have the given keyword in their descriptions.
  * @param {string} keyword The keyword to search for.
- * @returns {Task[]} The search results.
+ * @returns {Promise<Task[]>} The search results.
  */
 async function searchDescription(keyword) {
   return request("search/description", { keyword });
@@ -126,7 +129,7 @@ async function searchDescription(keyword) {
 /**
  * Search all tasks that have the given priority.
  * @param {Priority} priority The priority to search for.
- * @returns {Task[]} The search results.
+ * @returns {Promise<Task[]>} The search results.
  */
 async function searchPriority(priority) {
   return request("search/priority", { priority });

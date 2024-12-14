@@ -1,0 +1,1 @@
+setTimeout(onResetFieldsClick, 0);

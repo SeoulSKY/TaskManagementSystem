@@ -26,108 +26,56 @@
   </head>
   <body>
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
-
-    <script>
-      const toast = new Notyf();
-
-      /**
-       * Create a new task input group
-       * @returns {HTMLElement} The new input group
-       */
-      function createTaskInput() {
-        const newTaskInput = document
-          .querySelector("#taskInput")
-          .cloneNode(true);
-        newTaskInput.id = "";
-        newTaskInput.classList.remove("hide");
-
-        return newTaskInput;
-      }
-
-      /**
-       * Create a new task card
-       * @param {Task} task The task data to fill in
-       * @returns {HTMLElement} The new task card
-       */
-      function createTaskCard(task) {
-        const newTaskCard = document.querySelector("#taskCard").cloneNode(true);
-        newTaskCard.id = "";
-        newTaskCard.classList.remove("hide");
-
-        newTaskCard.querySelector("#taskCardTitle").textContent = task.title;
-        newTaskCard.querySelector("#taskCardDescription").textContent =
-          task.description;
-        newTaskCard.querySelector("#taskCardPriority").textContent =
-          task.priority;
-
-        return newTaskCard;
-      }
-
-      /**
-       * Remove all children of the given element
-       *
-       * @param {HTMLElement} element The element to remove children from
-       */
-      function removeChildren(element) {
-        [...element.children].forEach((child) => child.remove());
-      }
-
-      /**
-       * Get the selected option from the given select element
-       *
-       * @param {HTMLElement} selectElement The select element containing the option
-       * @return {HTMLElement | undefined} The selected option
-       */
-      function getSelectedOption(selectElement) {
-        return selectElement.options[selectElement.selectedIndex];
-      }
-    </script>
+    <script src="utils.js"></script>
+    <script src="eventHandlers.js"></script>
+    <script src="init.js"></script>
 
     <!-- Components -->
+    <div id="components" class="hide">
+      <div id="taskInput" class="row my-2">
+        <div class="col">
+          <input
+            id="createTitleInput"
+            type="text"
+            class="form-control"
+            placeholder="Title"
+            aria-label="Title"
+          />
+        </div>
+        <div class="col">
+          <input
+            id="createDescriptionInput"
+            type="text"
+            class="form-control"
+            placeholder="Description"
+            aria-label="Description"
+          />
+        </div>
+        <div class="col">
+          <select
+            id="createPrioritySelect"
+            class="form-select"
+            aria-label="select priority"
+          >
+            <option selected value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+          </select>
+        </div>
+      </div>
 
-    <div id="taskInput" class="row my-2 hide">
-      <div class="col">
-        <input
-          id="createTitleInput"
-          type="text"
-          class="form-control"
-          placeholder="Title"
-          aria-label="Title"
-        />
-      </div>
-      <div class="col">
-        <input
-          id="createDescriptionInput"
-          type="text"
-          class="form-control"
-          placeholder="Description"
-          aria-label="Description"
-        />
-      </div>
-      <div class="col">
-        <select
-          id="createPrioritySelect"
-          class="form-select"
-          aria-label="select priority"
+      <ul id="taskCard" class="list-group my-2 justify-content-between">
+        <li
+          class="list-group-item d-flex justify-content-between align-items-center"
         >
-          <option selected>Low</option>
-          <option>Medium</option>
-          <option>High</option>
-        </select>
-      </div>
+          <span id="taskCardTitle">Title</span>
+          <span id="taskCardDescription">Description</span>
+          <span id="taskCardPriority" class="badge text-bg-primary rounded-pill"
+            >Priority</span
+          >
+        </li>
+      </ul>
     </div>
-
-    <ul id="taskCard" class="list-group hide my-2 justify-content-between">
-      <li
-        class="list-group-item d-flex justify-content-between align-items-center"
-      >
-        <span id="taskCardTitle">Title</span>
-        <span id="taskCardDescription">Description</span>
-        <span id="taskCardPriority" class="badge text-bg-primary rounded-pill"
-          >Priority</span
-        >
-      </li>
-    </ul>
 
     <main class="container">
       <ul class="nav nav-tabs mt-1 mb-5" id="tab" role="tablist">
@@ -169,6 +117,7 @@
             role="tab"
             aria-controls="update-tab-pane"
             aria-selected="false"
+            onclick="onUpdateEnter()"
           >
             Update
           </button>
@@ -338,7 +287,10 @@
           role="tabpanel"
           aria-labelledby="update-tab"
         >
-          ...
+          <div id="updateTaskContainer" class="my-2"></div>
+          <button class="btn btn-primary w-100" onclick="onUpdateSubmit()">
+            Update
+          </button>
         </div>
         <!-- Pane for Delete-->
 
@@ -352,182 +304,5 @@
         </div>
       </div>
     </main>
-    <script>
-      /* Event handlers */
-
-      function onAddFieldClick() {
-        document
-          .querySelector("#createTaskContainer")
-          .appendChild(createTaskInput());
-      }
-
-      async function onCreateSubmit() {
-        const container = document.querySelector("#createTaskContainer");
-        const tasks = [];
-        for (const inputGroup of container.children) {
-          const title = inputGroup.querySelector("#createTitleInput").value;
-          if (!title) {
-            toast.error("Title is required");
-            return;
-          }
-
-          const description = inputGroup.querySelector(
-            "#createDescriptionInput"
-          ).value;
-
-          if (!description) {
-            toast.error("Description is required");
-            return;
-          }
-
-          const priority = getSelectedOption(
-            inputGroup.querySelector("#createPrioritySelect")
-          ).value;
-
-          tasks.push({ title, description, priority });
-        }
-
-        try {
-          if (tasks.length === 1) {
-            await addTask(tasks[0]);
-          } else {
-            await addTasks(tasks);
-          }
-        } catch (err) {
-          toast.error(err.message);
-          console.error(err);
-          return;
-        }
-
-        removeChildren(container);
-
-        tasks.forEach((task) => {
-          container.appendChild(createTaskCard(task));
-        });
-
-        toast.success("Task added successfully");
-
-        onResetFieldsClick();
-      }
-
-      function onResetFieldsClick() {
-        const container = document.querySelector("#createTaskContainer");
-        removeChildren(container);
-        container.appendChild(createTaskInput());
-      }
-
-      async function onReadTitleSubmit() {
-        const titleInput = document.querySelector("#readTitleInput");
-        const option = getSelectedOption(
-          document.querySelector("#readTitleSelect")
-        );
-
-        if (!titleInput.value) {
-          toast.error("Title is required");
-          return;
-        }
-
-        let tasks;
-        try {
-          if (option.value === "match") {
-            tasks = [await getTask(titleInput.value)];
-          } else {
-            tasks = await searchTitle(titleInput.value);
-          }
-        } catch (err) {
-          toast.error(err.message);
-          console.error(err);
-          return;
-        }
-
-        const container = document.querySelector("#readTaskContainer");
-
-        removeChildren(container);
-
-        if (tasks.length === 0) {
-          toast.error("No tasks found");
-          return;
-        }
-
-        tasks.forEach((task) => {
-          container.appendChild(createTaskCard(task));
-        });
-
-        titleInput.value = "";
-      }
-
-      async function onReadDescriptionSubmit() {
-        const descriptionInput = document.querySelector(
-          "#readDescriptionInput"
-        );
-
-        if (!descriptionInput.value) {
-          toast.error("Keyword is required");
-          return;
-        }
-
-        let tasks;
-        try {
-          tasks = await searchDescription(descriptionInput.value);
-        } catch (err) {
-          toast.error(err.message);
-          console.error(err);
-          return;
-        }
-
-        if (tasks.length === 0) {
-          toast.error("No tasks found");
-          return;
-        }
-
-        const container = document.querySelector("#readTaskContainer");
-
-        removeChildren(container);
-
-        tasks.forEach((task) => {
-          container.appendChild(createTaskCard(task));
-        });
-
-        descriptionInput.value = "";
-      }
-
-      async function onReadPrioritySubmit() {
-        const option = getSelectedOption(
-          document.querySelector("#readPrioritySelect")
-        );
-
-        let tasks;
-        try {
-          if (option.value === "all") {
-            tasks = await getAllTasks();
-          } else {
-            tasks = await searchPriority(option.value);
-          }
-        } catch (err) {
-          toast.error(err.message);
-          console.error(err);
-          return;
-        }
-
-        if (tasks.length === 0) {
-          toast.error("No tasks found");
-          return;
-        }
-
-        const container = document.querySelector("#readTaskContainer");
-
-        removeChildren(container);
-
-        tasks.forEach((task) => {
-          container.appendChild(createTaskCard(task));
-        });
-      }
-    </script>
-
-    <script>
-      /* Initialization code */
-
-      setTimeout(onResetFieldsClick, 0);
-    </script>
   </body>
 </html>

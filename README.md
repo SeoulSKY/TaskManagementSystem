@@ -10,7 +10,7 @@
 
 * Install [Docker](https://www.docker.com/get-started/)
 
-#### How to run
+#### How to Run
 
 Run the following command
 

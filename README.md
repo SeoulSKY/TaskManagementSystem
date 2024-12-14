@@ -1,5 +1,7 @@
 # Task Management System
 
+![Ruff](https://github.com/SeoulSKY/TaskManagementSystem/actions/workflows/ruff.yml/badge.svg)
+![Pytest](https://github.com/SeoulSKY/TaskManagementSystem/actions/workflows/pytest.yml/badge.svg)
 
 ## How to setup the environment
 
@@ -51,6 +53,14 @@ pyenv exec fastapi dev main.py
 Click [here](http://localhost:8000) to use the task management system with a web browser.
 
 ## Continuous Integration
+
+### Pipeline
+
+![Ruff](https://github.com/SeoulSKY/TaskManagementSystem/actions/workflows/ruff.yml/badge.svg) — Result of linting for coding style.
+
+![Pytest](https://github.com/SeoulSKY/TaskManagementSystem/actions/workflows/pytest.yml/badge.svg) — Result of running test suites.
+
+### Manual
 
 To check whether the codebase follows the best practices, run the linter
 

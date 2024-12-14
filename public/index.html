@@ -103,6 +103,7 @@
             role="tab"
             aria-controls="read-tab-pane"
             aria-selected="false"
+            onclick="onReadEnter()"
           >
             Read
           </button>
@@ -224,7 +225,7 @@
                     type="text"
                     class="form-control"
                     aria-label="Text input with dropdown button"
-                    placeholder="Enter text..."
+                    placeholder="Title or Keyword"
                   />
                   <select id="readTitleSelect" class="form-select">
                     <option selected value="match">Exact match</option>
@@ -245,8 +246,7 @@
                   id="readDescriptionInput"
                   type="text"
                   class="form-control"
-                  aria-label="Text input with dropdown button"
-                  placeholder="Enter keyword..."
+                  placeholder="Keyword"
                 />
                 <button
                   class="btn btn-primary mt-3"
@@ -300,7 +300,18 @@
           role="tabpanel"
           aria-labelledby="delete-tab"
         >
-          ...
+          <input
+            id="deleteInput"
+            type="text"
+            class="form-control"
+            placeholder="Title"
+          />
+          <button class="btn btn-primary w-100 my-3" onclick="onDeleteSubmit()">
+            Submit
+          </button>
+          <button class="btn btn-danger mt-5" onclick="onDeleteAllSubmit()">
+            Delete All
+          </button>
         </div>
       </div>
     </main>

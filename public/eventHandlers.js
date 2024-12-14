@@ -7,7 +7,7 @@ async function onCreateSubmit() {
 
   let tasks;
   try {
-    tasks = await parseTasks(container);
+    tasks = [...container.children].map(parseTask);
 
     if (tasks.length === 1) {
       await addTask(tasks[0]);
@@ -35,6 +35,10 @@ function onResetFieldsClick() {
   const container = document.querySelector("#createTaskContainer");
   removeChildren(container);
   container.appendChild(createTaskInput());
+}
+
+function onReadEnter() {
+  removeChildren(document.querySelector("#readTaskContainer"));
 }
 
 async function onReadTitleSubmit() {
@@ -170,10 +174,12 @@ async function onUpdateEnter() {
 }
 
 async function onUpdateSubmit() {
+  const tasks = [
+    ...document.querySelector("#updateTaskContainer").children,
+  ].map(parseTask);
+
   try {
-    for (const task of await parseTasks(
-      document.querySelector("#updateTaskContainer")
-    )) {
+    for (const task of tasks) {
       await updateTask(task);
     }
   } catch (err) {
@@ -183,4 +189,36 @@ async function onUpdateSubmit() {
   }
 
   toast.success("Tasks updated successfully");
+}
+
+async function onDeleteSubmit() {
+  const titleInput = document.querySelector("#deleteInput");
+  if (!titleInput.value) {
+    toast.error("Title is required");
+    return;
+  }
+
+  try {
+    await deleteTask(titleInput.value);
+  } catch (err) {
+    console.error(err);
+    toast.error(err.message);
+    return;
+  }
+
+  titleInput.value = "";
+
+  toast.success("Tasks deleted successfully");
+}
+
+async function onDeleteAllSubmit() {
+  try {
+    await clearTasks();
+  } catch (err) {
+    console.error(err);
+    toast.error(err.message);
+    return;
+  }
+
+  toast.success("All tasks deleted successfully");
 }

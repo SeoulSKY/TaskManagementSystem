@@ -83,6 +83,16 @@ async function updateTask(task) {
 }
 
 /**
+ * Delete a task that matches the given title.
+ * @param {string} title The title of the task to delete.
+ * @returns {Promise<void}
+ * @throws {Error} If the task does not exist.
+ */
+async function deleteTask(title) {
+  return request("task", { title }, "DELETE");
+}
+
+/**
  * Get all tasks sorted by their priority.
  * @returns {Promise<Task[]>} The tasks sorted by their priority.
  */

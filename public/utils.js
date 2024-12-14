@@ -48,29 +48,25 @@ function getSelectedOption(selectElement) {
 }
 
 /**
- * Parse the elements in the given container to Task objects
- * @param {HTMLElement} container The container element containing task inputs
- * @returns {Promise<Task[]>} The parsed tasks from the given container element
+ * Parse the given task element to an Task object.
+ * @param {HTMLElement} taskInput The task element to parse.
+ * @returns {Task} The parsed task from the given task input element.
  */
-async function parseTasks(container) {
-  return [...container.children].map((inputGroup) => {
-    const title = inputGroup.querySelector("#createTitleInput").value;
-    if (!title) {
-      throw new Error("Title is required");
-    }
+function parseTask(taskInput) {
+  const title = taskInput.querySelector("#createTitleInput").value;
+  if (!title) {
+    throw new Error("Title is required");
+  }
 
-    const description = inputGroup.querySelector(
-      "#createDescriptionInput"
-    ).value;
+  const description = taskInput.querySelector("#createDescriptionInput").value;
 
-    if (!description) {
-      throw new Error("Description is required");
-    }
+  if (!description) {
+    throw new Error("Description is required");
+  }
 
-    const priority = getSelectedOption(
-      inputGroup.querySelector("#createPrioritySelect")
-    ).value;
+  const priority = getSelectedOption(
+    taskInput.querySelector("#createPrioritySelect")
+  ).value;
 
-    return { title, description, priority };
-  });
+  return { title, description, priority };
 }

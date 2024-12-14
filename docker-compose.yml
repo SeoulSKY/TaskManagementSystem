@@ -1,0 +1,7 @@
+services:
+  tms:
+    build:
+      context: .
+    container_name: tms
+    ports:
+      - "8000:8000"

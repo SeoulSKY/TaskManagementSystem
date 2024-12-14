@@ -1,6 +1,23 @@
 # Task Management System
 
+
 ## How to setup the environment
+
+### Option 1
+
+* Install [Docker](https://www.docker.com/get-started/)
+
+#### How to run
+
+Run the following command
+
+```bash
+docker compose up --build
+```
+
+Click [here](http://localhost:8000) to use the task management system with a web browser.
+
+### Option 2
 
 * Install [pyenv](https://github.com/pyenv/pyenv#installation)
 
@@ -23,9 +40,9 @@ Install the required packages
 pyenv exec pip install -r requirements.txt 
 ```
 
-## How to Run
+#### How to Run
 
-Run the following command
+Run the following command.
 
 ```bash
 pyenv exec fastapi dev main.py

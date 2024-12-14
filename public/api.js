@@ -60,7 +60,7 @@ async function request(endpoint, data = {}, method = "GET") {
  * @throws {Error} If the task does not exist.
  */
 async function getTask(title) {
-  return request("tasks", { title });
+  return request("task", { title });
 }
 
 /**
@@ -79,15 +79,6 @@ async function addTask(task) {
  */
 async function updateTask(task) {
   return request("tasks", task, "PUT");
-}
-
-/**
- * Search all tasks that have the given keyword in their titles.
- * @param {string} keyword The keyword to search for.
- * @returns {Task[]} The search results.
- */
-async function searchTitle(keyword) {
-  return request("search/titles", { keyword }, "PUT");
 }
 
 /**
@@ -120,7 +111,7 @@ async function clearTasks() {
  * @returns {Task[]} The search results.
  */
 async function searchTitle(keyword) {
-  return request("search/titles", { title });
+  return request("search/title", { keyword });
 }
 
 /**

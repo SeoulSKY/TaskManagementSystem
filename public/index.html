@@ -13,13 +13,13 @@
       crossorigin="anonymous"
     ></script>
 
-    <link rel="stylesheet" href="styles.css" />
-    <script defer type="text/javascript" src="script.js"></script>
-
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css"
     />
+
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="api.js"></script>
 
     <meta charset="UTF-8" />
     <title>Task Management System</title>
@@ -27,91 +27,100 @@
   <body>
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 
-    <script type="text/javascript">
+    <script>
       const toast = new Notyf();
 
       /**
-       * Handle the Add Field event
+       * Create a new task input group
+       * @returns {HTMLElement} The new input group
        */
-      function onAddFieldClick() {
-        const inputGroup = document.getElementById("taskInputGroup");
-        const inputContainer = document.getElementById("taskInputContainer");
+      function createTaskInput() {
+        const newTaskInput = document
+          .querySelector("#taskInput")
+          .cloneNode(true);
+        newTaskInput.id = "";
+        newTaskInput.classList.remove("hide");
 
-        const newInputGroup = inputGroup.cloneNode(true);
-        [...newInputGroup.querySelectorAll("input")].forEach(
-          (element) => (element.value = "")
-        );
-        inputContainer.appendChild(newInputGroup);
+        return newTaskInput;
       }
 
       /**
-       * Create new tasks
+       * Create a new task card
+       * @param {Task} task The task data to fill in
+       * @returns {HTMLElement} The new task card
        */
-      async function createTasks() {
-        const inputContainer = document.getElementById("taskInputContainer");
-        const tasks = [];
-        for (const inputGroup of inputContainer.children) {
-          const title = inputGroup.querySelector("input[name='title']").value;
-          if (!title) {
-            toast.error("Title is required");
-            return;
-          }
+      function createTaskCard(task) {
+        const newTaskCard = document.querySelector("#taskCard").cloneNode(true);
+        newTaskCard.id = "";
+        newTaskCard.classList.remove("hide");
 
-          const description = inputGroup.querySelector(
-            "input[name='description']"
-          ).value;
+        newTaskCard.querySelector("#taskCardTitle").textContent = task.title;
+        newTaskCard.querySelector("#taskCardDescription").textContent =
+          task.description;
+        newTaskCard.querySelector("#taskCardPriority").textContent =
+          task.priority;
 
-          if (!description) {
-            toast.error("Description is required");
-            return;
-          }
-
-          const priority = [
-            ...inputGroup.querySelector("select[name='priority']").options,
-          ].filter((option) => option.selected)[0]?.value;
-
-          if (!priority) {
-            toast.error("Priority is required");
-            return;
-          }
-
-          tasks.push({ title, description, priority });
-        }
-
-        try {
-          if (tasks.length === 1) {
-            await addTask(tasks[0]);
-          } else {
-            await addTasks(tasks);
-          }
-        } catch (err) {
-          toast.error(err.message);
-          console.error(err);
-          return;
-        }
-
-        toast.success("Task added successfully");
-
-        resetAllFields();
+        return newTaskCard;
       }
 
-      function resetAllFields() {
-        const inputContainer = document.getElementById("taskInputContainer");
-
-        [...inputContainer.children].forEach((element, i) => {
-          if (i === 0) {
-            element
-              .querySelectorAll("input")
-              .forEach((element) => (element.value = ""));
-            element.querySelector("select").options[0].selected = true;
-            return;
-          }
-          element.remove();
-        });
+      /**
+       * Remove all children of the given element
+       *
+       * @param {HTMLElement} element The element to remove children from
+       */
+      function removeChildren(element) {
+        [...element.children].forEach((child) => child.remove());
       }
     </script>
 
-    <div class="container">
+    <!-- Components -->
+
+    <div id="taskInput" class="row my-2 hide">
+      <div class="col">
+        <input
+          id="createTitleInput"
+          type="text"
+          class="form-control"
+          placeholder="Title"
+          aria-label="Title"
+        />
+      </div>
+      <div class="col">
+        <input
+          id="createDescriptionInput"
+          type="text"
+          class="form-control"
+          placeholder="Description"
+          aria-label="Description"
+        />
+      </div>
+      <div class="col">
+        <select
+          id="createPrioritySelect"
+          class="form-select"
+          aria-label="select priority"
+        >
+          <option selected disabled value="">Select a priority</option>
+          <option>Low</option>
+          <option>Medium</option>
+          <option>High</option>
+        </select>
+      </div>
+    </div>
+
+    <ul id="taskCard" class="list-group hide my-2 justify-content-between">
+      <li
+        class="list-group-item d-flex justify-content-between align-items-center"
+      >
+        <span id="taskCardTitle">Title</span>
+        <span id="taskCardDescription">Description</span>
+        <span id="taskCardPriority" class="badge text-bg-primary rounded-pill"
+          >Priority</span
+        >
+      </li>
+    </ul>
+
+    <main class="container">
       <ul class="nav nav-tabs mt-1 mb-5" id="tab" role="tablist">
         <li class="nav-item" role="presentation">
           <button
@@ -171,58 +180,28 @@
         </li>
       </ul>
       <div class="tab-content" id="tabContent">
+        <!-- Pane for Create-->
         <div
           class="tab-pane fade show active"
           id="create-tab-pane"
           role="tabpanel"
           aria-labelledby="create-tab"
-          tabindex="0"
         >
           <button class="btn btn-outline-primary" onclick="onAddFieldClick()">
             Add Field
           </button>
-          <button class="btn btn-danger" onclick="resetAllFields()">
+          <button class="btn btn-danger" onclick="onResetFieldsClick()">
             Reset All Fields
           </button>
-          <div id="taskInputContainer" class="taskContainer">
-            <div id="taskInputGroup" class="row my-2">
-              <div class="col">
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Title"
-                  aria-label="Title"
-                  name="title"
-                />
-              </div>
-              <div class="col">
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Description"
-                  aria-label="Description"
-                  name="description"
-                />
-              </div>
-              <div class="col">
-                <select
-                  class="form-select"
-                  aria-label="select priority"
-                  name="priority"
-                >
-                  <option selected disabled value="">Select a priority</option>
-                  <option>Low</option>
-                  <option>Medium</option>
-                  <option>High</option>
-                </select>
-              </div>
-            </div>
-          </div>
 
-          <button class="btn btn-primary w-100 mt-3" onclick="createTasks()">
+          <div id="createTaskContainer"></div>
+
+          <button class="btn btn-primary w-100 my-3" onclick="onCreateSubmit()">
             Submit
           </button>
         </div>
+
+        <!-- Pane for Read-->
         <div
           class="tab-pane fade"
           id="read-tab-pane"
@@ -230,27 +209,248 @@
           aria-labelledby="read-tab"
           tabindex="0"
         >
-          ...
+          <div class="d-flex align-items-start">
+            <div
+              class="nav flex-column nav-pills me-3"
+              id="v-pills-tab"
+              role="tablist"
+              aria-orientation="vertical"
+            >
+              <button
+                class="nav-link active"
+                id="v-pills-title-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#v-pills-title"
+                type="button"
+                role="tab"
+                aria-controls="v-pills-title"
+                aria-selected="true"
+              >
+                Title
+              </button>
+              <button
+                class="nav-link"
+                id="v-pills-description-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#v-pills-description"
+                type="button"
+                role="tab"
+                aria-controls="v-pills-description"
+                aria-selected="false"
+              >
+                Description
+              </button>
+              <button
+                class="nav-link"
+                id="v-pills-priority-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#v-pills-priority"
+                type="button"
+                role="tab"
+                aria-controls="v-pills-priority"
+                aria-selected="false"
+              >
+                Priority
+              </button>
+            </div>
+            <div class="tab-content w-100" id="v-pills-tabContent">
+              <div
+                class="tab-pane fade show active"
+                id="v-pills-title"
+                role="tabpanel"
+                aria-labelledby="v-pills-title-tab"
+              >
+                <div class="input-group mb-3">
+                  <input
+                    id="readTitleInput"
+                    type="text"
+                    class="form-control"
+                    aria-label="Text input with dropdown button"
+                    placeholder="Enter text..."
+                  />
+                  <select id="readTitleSelect" class="form-select">
+                    <option selected value="match">Exact match</option>
+                    <option value="keyword">Includes keyword</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" onclick="onReadTitleSubmit()">
+                  Submit
+                </button>
+              </div>
+              <div
+                class="tab-pane fade"
+                id="v-pills-description"
+                role="tabpanel"
+                aria-labelledby="v-pills-description-tab"
+              >
+                <input
+                  id="readDescriptionInput"
+                  type="text"
+                  class="form-control"
+                  aria-label="Text input with dropdown button"
+                  placeholder="Enter keyword..."
+                />
+                <button
+                  class="btn btn-primary mt-3"
+                  onclick="onReadDescriptionSubmit()"
+                >
+                  Submit
+                </button>
+              </div>
+              <div
+                class="tab-pane fade"
+                id="v-pills-priority"
+                role="tabpanel"
+                aria-labelledby="v-pills-priority-tab"
+              >
+                <select id="readPrioritySelect" class="form-select">
+                  <option selected>All</option>
+                  <option>Low</option>
+                  <option>Medium</option>
+                  <option>High</option>
+                </select>
+                <button class="btn btn-primary mt-3">Submit</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="readTaskContainer" class="my-2"></div>
         </div>
+        <!-- Pane for Update-->
+
         <div
           class="tab-pane fade"
           id="update-tab-pane"
           role="tabpanel"
           aria-labelledby="update-tab"
-          tabindex="0"
         >
           ...
         </div>
+        <!-- Pane for Delete-->
+
         <div
           class="tab-pane fade"
           id="delete-tab-pane"
           role="tabpanel"
           aria-labelledby="delete-tab"
-          tabindex="0"
         >
           ...
         </div>
       </div>
-    </div>
+    </main>
+    <script>
+      /* Event handlers */
+
+      function onAddFieldClick() {
+        document
+          .querySelector("#createTaskContainer")
+          .appendChild(createTaskInput());
+      }
+
+      async function onCreateSubmit() {
+        const container = document.querySelector("#createTaskContainer");
+        const tasks = [];
+        for (const inputGroup of container.children) {
+          const title = inputGroup.querySelector("#createTitleInput").value;
+          if (!title) {
+            toast.error("Title is required");
+            return;
+          }
+
+          const description = inputGroup.querySelector(
+            "#createDescriptionInput"
+          ).value;
+
+          if (!description) {
+            toast.error("Description is required");
+            return;
+          }
+
+          const priority = [
+            ...inputGroup.querySelector("#createPrioritySelect").options,
+          ].filter((option) => option.selected)[0]?.value;
+
+          if (!priority) {
+            toast.error("Priority is required");
+            return;
+          }
+
+          tasks.push({ title, description, priority });
+        }
+
+        try {
+          if (tasks.length === 1) {
+            await addTask(tasks[0]);
+          } else {
+            await addTasks(tasks);
+          }
+        } catch (err) {
+          toast.error(err.message);
+          console.error(err);
+          return;
+        }
+
+        removeChildren(container);
+
+        tasks.forEach((task) => {
+          container.appendChild(createTaskCard(task));
+        });
+
+        toast.success("Task added successfully");
+
+        onResetFieldsClick();
+      }
+
+      function onResetFieldsClick() {
+        const container = document.querySelector("#createTaskContainer");
+        removeChildren(container);
+        container.appendChild(createTaskInput());
+      }
+
+      async function onReadTitleSubmit() {
+        const titleInput = document.querySelector("#readTitleInput");
+        const option = [
+          ...document.querySelector("#readTitleSelect").options,
+        ].filter((option) => option.selected)[0];
+
+        if (!titleInput.value) {
+          toast.error("Title is required");
+          return;
+        }
+
+        let tasks;
+        try {
+          switch (option.value) {
+            case "match":
+              tasks = [await getTask(titleInput.value)];
+              break;
+            case "keyword":
+              tasks = await searchTitle(titleInput.value);
+              break;
+            default:
+              console.error("Invalid title option: " + option.value);
+              return;
+          }
+        } catch (err) {
+          toast.error(err.message);
+          console.error(err);
+          return;
+        }
+
+        const container = document.querySelector("#readTaskContainer");
+
+        removeChildren(container);
+
+        tasks.forEach((task) => {
+          container.appendChild(createTaskCard(task));
+        });
+      }
+    </script>
+
+    <script>
+      /* Initialization code */
+
+      setTimeout(onResetFieldsClick, 0);
+    </script>
   </body>
 </html>

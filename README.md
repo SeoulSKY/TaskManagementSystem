@@ -70,7 +70,7 @@ This repository uses GitHub Actions for implementing CI pipelines.
 To check whether the codebase follows the best practices, run the linter
 
 ```bash
-ruff check
+pyenv exec ruff check
 ```
 
 To run the test suite, run the following command

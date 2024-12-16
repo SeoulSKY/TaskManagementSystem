@@ -73,12 +73,10 @@ class Task(BaseModel):
     description: str
     priority: Priority
 
-
     @field_serializer("priority")
     def serialize_priority(self, priority: Priority, _: type) -> str:
         """Serialize priority field."""
         return priority.name
-
 
     def __hash__(self) -> int:
         """Return a hash code for this task.
@@ -174,7 +172,7 @@ class TaskManager:
         :raises ValueError: If there is no task with the title in the given task.
         """
         self.delete_task(task.title)
-        self._tasks[task.priority][task.title] = task
+        self.add_task(task)
 
     def get_task(self, *, title: str) -> Task:
         """Get a task by its title.
@@ -209,7 +207,7 @@ class TaskManager:
         :return: All tasks that are sorted by priority from highest to lowest.
         """
         for priority in reversed(Priority):
-            yield from self._tasks[priority].values()
+            yield from self.get_tasks(priority=priority)
 
     def search_tasks(self, *, predicate: Callable[[Task], bool]) -> Iterable[Task]:
         """Lazily search for tasks that satisfy a given predicate.
